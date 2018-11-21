@@ -1,6 +1,10 @@
 package Steps;
 
+import Framework.CapabilitiesDevices;
+import Framework.ComplexPerson;
 import PageObject.PlayStoreHomePage;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.appium.java_client.MobileElement;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.AndroidElement;
@@ -19,6 +23,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -29,7 +36,7 @@ public class AppiumTest {
     private PlayStoreHomePage playStoreHomePage;
 
     @BeforeMethod
-    public void setUp(ITestContext context) throws MalformedURLException {
+    public void setUp(ITestContext context) throws MalformedURLException, FileNotFoundException {
         driver = new AndroidDriver<AndroidElement>(new URL("http://127.0.0.1:4729/wd/hub"), getCapabilities());
         wait = new WebDriverWait(driver, 30)
                 .ignoring(StaleElementReferenceException.class)
@@ -46,37 +53,43 @@ public class AppiumTest {
     @DataProvider(name = "test1")
     public Object[][] createData1() {
         return new Object[][]{
-                { "Procountor" },
-                { "test" },
+                {"Procountor"},
+                {"test"},
         };
     }
 
-    @Test(dataProvider = "test1")
+    @Test(dataProvider = "test1",groups = {"regression"})
     public void SearchInstore(String appName) throws MalformedURLException {
         playStoreHomePage.SearchInstore();
 
-//        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(@resource-id,'title')][@text='STRONA GŁÓWNA']")));
-//        driver.findElement(By.xpath("//*[contains(@resource-id,'search_box_idle_text')]")).click();
-//        driver.findElementByXPath("//*[contains(@resource-id,'search_box_text_input')]").sendKeys("test");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(@resource-id,'title')][@text='STRONA GŁÓWNA']")));
+        driver.findElement(By.xpath("//*[contains(@resource-id,'search_box_idle_text')]")).click();
+        driver.findElementByXPath("//*[contains(@resource-id,'search_box_text_input')]").sendKeys("test");
     }
 
     @AfterMethod
     public void tearDown() {
-//        driver.quit();
+        driver.quit();
     }
 
-    private DesiredCapabilities getCapabilities() {
+    private DesiredCapabilities getCapabilities() throws FileNotFoundException {
+        Gson g = new Gson();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        BufferedReader br = new BufferedReader(new FileReader("./src/test/resources/capabilitiesDevices.json"));
+        CapabilitiesDevices capabilitiesDevices = g.fromJson(br, CapabilitiesDevices.class);
+
         DesiredCapabilities capabilities = new DesiredCapabilities();
-        capabilities.setCapability("BROWSER_NAME", "Android");
-        capabilities.setCapability("VERSION", "7.0");
-        capabilities.setCapability("deviceName", "HUAWEI_nova");
-        capabilities.setCapability("udid", "FPFDU16930007077");
-        capabilities.setCapability("platformName", "Android");
-        capabilities.setCapability("appPackage", "com.android.vending");
-        capabilities.setCapability("appActivity", "com.android.vending.AssetBrowserActivity");
-        capabilities.setCapability("autoGrantPermissions", true);
-        capabilities.setCapability("newCommandTimeout", 900000);
-        capabilities.setCapability("androidInstallTimeout", 900000);
+        capabilities.setCapability("BROWSER_NAME", capabilitiesDevices.getDeviceName());
+        capabilities.setCapability("VERSION", capabilitiesDevices.getVERSION());
+        capabilities.setCapability("deviceName", capabilitiesDevices.getDeviceName());
+        capabilities.setCapability("udid", capabilitiesDevices.getUdid());
+        capabilities.setCapability("platformName", capabilitiesDevices.getPlatformName());
+        capabilities.setCapability("appPackage", capabilitiesDevices.getAppPackage());
+        capabilities.setCapability("appActivity", capabilitiesDevices.getAppActivity());
+        capabilities.setCapability("autoGrantPermissions", capabilitiesDevices.getAutoGrantPermissions());
+        capabilities.setCapability("newCommandTimeout", capabilitiesDevices.getNewCommandTimeout());
+        capabilities.setCapability("androidInstallTimeout", capabilitiesDevices.getAndroidInstallTimeout());
         return capabilities;
     }
 }
