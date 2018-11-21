@@ -1,6 +1,7 @@
 package Steps;
 
 import Framework.ComplexPerson;
+import Framework.TestHooks;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.testng.annotations.Test;
@@ -10,7 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.nio.Buffer;
 
-public class DataTest {
+public class DataTest extends TestHooks{
     @Test
     public void dataTest() throws FileNotFoundException {
         Gson g = new Gson();

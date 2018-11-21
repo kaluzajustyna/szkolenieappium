@@ -2,6 +2,7 @@ package Steps;
 
 import Framework.CapabilitiesDevices;
 import Framework.ComplexPerson;
+import Framework.TestHooks;
 import PageObject.PlayStoreHomePage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,6 +10,8 @@ import io.appium.java_client.MobileElement;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.AndroidElement;
 import io.appium.java_client.remote.MobileCapabilityType;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Story;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -29,68 +32,34 @@ import java.io.FileReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class AppiumTest {
+public class AppiumTest extends TestHooks {
 
-    private AndroidDriver<AndroidElement> driver;
-    private FluentWait<WebDriver> wait;
     private PlayStoreHomePage playStoreHomePage;
 
-    @BeforeMethod(groups = {"regression"})
-    public void setUp(ITestContext context) throws MalformedURLException, FileNotFoundException {
-        driver = new AndroidDriver<AndroidElement>(new URL("http://127.0.0.1:4729/wd/hub"), getCapabilities());
-        wait = new WebDriverWait(driver, 30)
-                .ignoring(StaleElementReferenceException.class)
-                .ignoring(NullPointerException.class)
-                .ignoring(ClassCastException.class)
-                .ignoring(NoSuchElementException.class);
+    @Epic("Basic google store test")
+    public class PlayStorePage extends TestHooks {
 
-        context.setAttribute("driver", this.driver);
-        context.setAttribute("wait", this.wait);
+        private PlayStorePage playStorePage;
 
-        playStoreHomePage = new PlayStoreHomePage(context);
-    }
+        @BeforeMethod(groups = {"regression"})
+        public void SetUp(ITestContext context) throws MalformedURLException, FileNotFoundException {
+            playStoreHomePage = new PlayStoreHomePage(context);
+        }
 
-    @DataProvider(name = "test1")
-    public Object[][] createData1() {
-        return new Object[][]{
-                {"Procountor"},
-                {"test"},
-        };
-    }
+        @DataProvider(name = "appName")
+        public Object[][] createAppNameData() {
+            return new Object[][]{
+                    {"Messenger"},
+                    {"Linkedin"},
+            };
+        }
 
-    @Test(dataProvider = "test1",groups = {"regression"})
-    public void SearchInstore(String appName) throws MalformedURLException {
-        playStoreHomePage.SearchInstore();
+        @Test(groups = {"regression", "Appium"}, dataProvider = "appName")
+        @Story("Search application in the store")
+        public void SearchInstore(String appName) {
+            playStoreHomePage.SearchInstore();
 
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(@resource-id,'title')][@text='STRONA GŁÓWNA']")));
-        driver.findElement(By.xpath("//*[contains(@resource-id,'search_box_idle_text')]")).click();
-        driver.findElementByXPath("//*[contains(@resource-id,'search_box_text_input')]").sendKeys("test");
-    }
 
-    @AfterMethod(groups = {"regression"})
-    public void tearDown() {
-        driver.quit();
-    }
-
-    private DesiredCapabilities getCapabilities() throws FileNotFoundException {
-        Gson g = new Gson();
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        BufferedReader br = new BufferedReader(new FileReader("./src/test/resources/capabilitiesDevices.json"));
-        CapabilitiesDevices capabilitiesDevices = g.fromJson(br, CapabilitiesDevices.class);
-
-        DesiredCapabilities capabilities = new DesiredCapabilities();
-        capabilities.setCapability("BROWSER_NAME", capabilitiesDevices.getDeviceName());
-        capabilities.setCapability("VERSION", capabilitiesDevices.getVERSION());
-        capabilities.setCapability("deviceName", capabilitiesDevices.getDeviceName());
-        capabilities.setCapability("udid", capabilitiesDevices.getUdid());
-        capabilities.setCapability("platformName", capabilitiesDevices.getPlatformName());
-        capabilities.setCapability("appPackage", capabilitiesDevices.getAppPackage());
-        capabilities.setCapability("appActivity", capabilitiesDevices.getAppActivity());
-        capabilities.setCapability("autoGrantPermissions", capabilitiesDevices.getAutoGrantPermissions());
-        capabilities.setCapability("newCommandTimeout", capabilitiesDevices.getNewCommandTimeout());
-        capabilities.setCapability("androidInstallTimeout", capabilitiesDevices.getAndroidInstallTimeout());
-        return capabilities;
+        }
     }
 }
-
