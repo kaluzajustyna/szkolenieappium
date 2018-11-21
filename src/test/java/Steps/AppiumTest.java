@@ -35,7 +35,7 @@ public class AppiumTest {
     private FluentWait<WebDriver> wait;
     private PlayStoreHomePage playStoreHomePage;
 
-    @BeforeMethod(groups = {"regression"})
+    @BeforeMethod(groups ={"regression"})
     public void setUp(ITestContext context) throws MalformedURLException, FileNotFoundException {
         driver = new AndroidDriver<AndroidElement>(new URL("http://127.0.0.1:4729/wd/hub"), getCapabilities());
         wait = new WebDriverWait(driver, 30)
@@ -67,7 +67,7 @@ public class AppiumTest {
         driver.findElementByXPath("//*[contains(@resource-id,'search_box_text_input')]").sendKeys("test");
     }
 
-    @AfterMethod
+    @AfterMethod(groups ={"regression"})
     public void tearDown() {
         driver.quit();
     }
